@@ -165,6 +165,87 @@ public class ReactiveCodingApplication {
 
 ```
 
-- Feature 2
-- Feature 3
+# Reactor Publisher
+
+There are two types Reactor publishers 
+1. Mono<T> : The mono can emmit 0 or 1 item followed with onComplete / onError
+  
+  If you are completely sure that only 1 item will be published from the publisher then it is recommended to use MONO
+
+2. Flux<T> : The flux can emit 0, 1... or n items followed with onComplete / onError
+
+## Why Mono and Flux?
+
+1. Flux:
+   <ol>
+      <li>Stream of messages</li>
+      <li>Back Pressure</li>
+      <li>Many additional method to handle the stream processing</li>
+   </ol>
+
+2. Mono
+
+   <ol>
+      <li>No Stream</li>
+      <li>No Back Pressure</li>
+      <li>A lightweight publisher</li>
+      <li>Request Response Model</li>
+   </ol>
+
+
+Here are some examples to better illustrate **laziness in reactive streams**:
+
+# Why are Reactive Streams Lazy?
+
+### Example: **Ordering Food in a Restaurant**
+Imagine you go to a restaurant:
+- You look at the menu (which is like subscribing).
+- You don’t want all the food on the menu immediately. You only order a dish when you’re ready (requesting data).
+- The chef won’t cook until you place an order. The chef waits for you to request food before starting (publisher being lazy).
+- If you decide to stop ordering (cancel subscription), the chef won’t prepare anything more, avoiding waste.
+
+**Reactive streams work the same way: the publisher (chef) only produces data (food) when the subscriber (you) asks for it.**
+
+
+### **Streams Example**
+
+```
+public class LazyStream {
+
+    public static final Logger log = LoggerFactory.getLogger(LazyStream.class);
+
+    public static void main(String[] args) {
+                Stream.of(10)
+                .peek((i) -> {
+                    for (int j = 0; j <= i; j++) {
+                        log.info("Data: {}", j);
+                    }
+                }).toList();
+    }
+}
+
+```
+
+### Key points:
+1. **Stream creation (`Stream.of(10)`)**:  
+   This creates a stream of one element (`10`). However, just creating a stream does nothing by itself—it's lazy. No data is processed at this stage.
+
+2. **Intermediate Operation (`peek`)**:  
+   The `peek` operation is used to inspect elements in a stream. This is an intermediate operation, meaning it **doesn’t trigger the stream to run**. Instead, it just sets up a transformation that will happen later when a terminal operation is called.
+
+   In your case, `peek` is logging a series of numbers from 0 to `i` (in this case, from 0 to 10). However, even this logging code is not executed immediately because the stream is still lazy.
+
+3. **Terminal Operation (`toList()`)**:  
+   The stream remains lazy until a terminal operation is invoked. Here, `toList()` is a terminal operation, and it triggers the stream to actually run. Only when `toList()` is called does the `peek` operation finally execute, and the `for` loop inside it starts logging the data.
+
+### How laziness works in this example:
+- **Before `toList()`**: No data processing happens, the `for` loop in `peek` does not run. The stream is just a pipeline of potential operations that could be executed, but they aren't yet.
+- **After `toList()`**: The terminal operation forces the stream to process its data. Now the `peek` operation starts logging numbers from 0 to 10, and only then does the stream finish.
+
+### Why is this lazy?
+- The intermediate operation (`peek`) is only configured when the stream is set up, but nothing happens until the terminal operation (`toList()`) is called.
+- Without `toList()` or another terminal operation like `forEach()` or `collect()`, **nothing would be logged**. The code inside `peek` would never run because the stream remains untriggered.
+
+In short, the stream is lazy because it delays any actual work (processing the data and logging) until a terminal operation is invoked (`toList()`).
+
 

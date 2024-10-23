@@ -1,0 +1,37 @@
+package com.pk.reactive_coding.common;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class DefaultSubscriber<T> implements Subscriber<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultSubscriber.class);
+
+    private final String name;
+
+    public DefaultSubscriber(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void onSubscribe(Subscription subscription) {
+        subscription.request(Long.MAX_VALUE);
+    }
+
+    @Override
+    public void onNext(T randomString) {
+        log.info("{} subscriber Received a string on onNext method {}", this.name, randomString);
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        log.error("{} subscriber Received a string on onNext method", this.name, t);
+    }
+
+    @Override
+    public void onComplete() {
+        log.info("{} subscriber onComplete method has been invoked", this.name);
+    }
+}
